@@ -120,7 +120,7 @@ protected:
 	virtual std::unique_ptr<Figure> clone() const = 0;
 		
     template <typename T>
-    friend std::unique_ptr<T> object::clone(const T&);
+    friend std::unique_ptr<T> clone(const T&);
 };
 
 struct Square : Figure
@@ -159,7 +159,7 @@ And now everything works just like before. Unfortunately this code is not so gen
 template <typename T>
 std::unique_ptr<T> clone(const T& object)
 {
-	using base_type = typename T::base_type; static_assert()
+	using base_type = typename T::base_type;
 	auto ptr = static_cast<const base_type&>(object).clone();
 	return std::unique_ptr<T>(static_cast<T*>(ptr));
 }
