@@ -60,3 +60,11 @@ TEST(FigureTests, cloned_square_via_base_pointer_should_return_same_area)
     ASSERT_THAT( square.area(), Eq(a*a));
     ASSERT_THAT(figure->area(), Eq(square.area()));
 }
+
+TEST(FigureTests, cloning_rvalue)
+{
+    auto square = Square{};
+    auto figure = Square{}.clone();
+
+    ASSERT_TRUE((std::is_same<Square*, decltype(figure)>::value));
+}

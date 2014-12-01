@@ -5,11 +5,12 @@
 
 namespace object
 {
-
     template<typename T>
     std::unique_ptr<T> clone(const T& object)
     {
-        return std::unique_ptr<T>(object.clone());
+        using base_type = typename T::base_type;
+        auto ptr = static_cast<const base_type&>(object).clone();
+        return std::unique_ptr<T>(static_cast<T*>(ptr));
     }
 
     template<typename T>
@@ -17,7 +18,6 @@ namespace object
     {
         return clone(*object);
     }
-
 }
 
 struct Figure
@@ -27,7 +27,11 @@ struct Figure
     virtual ~Figure() = default;
     virtual double  area()  const = 0;
 
+protected:
     virtual Figure* clone() const = 0;
+
+    template <typename T>
+    friend std::unique_ptr<T> object::clone(const T&);
 };
 
 struct Square : Figure
@@ -43,6 +47,7 @@ struct Square : Figure
         return a * a;
     }
 
+protected:
     Square* clone() const override     // return type is Square* instead of Figure* (Covariant Return Type)
     {
         return new Square(*this);
@@ -51,7 +56,7 @@ struct Square : Figure
 
 using namespace ::testing;
 
-TEST(FigureTests_v2, square_clone_method_called_directly_return_pointer_of_type_Square)
+TEST(FigureTests_v3, square_clone_method_called_directly_return_pointer_of_type_Square)
 {
     auto square = Square{};
     auto figure = object::clone(square);
@@ -59,7 +64,7 @@ TEST(FigureTests_v2, square_clone_method_called_directly_return_pointer_of_type_
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v2, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
+TEST(FigureTests_v3, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
 {
     auto square = Square{};
     auto square_figure = static_cast<Figure*>(&square);
@@ -68,7 +73,7 @@ TEST(FigureTests_v2, square_clone_method_called_via_base_class_return_pointer_of
     ASSERT_TRUE((std::is_same<std::unique_ptr<Figure>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v2, cloned_square_via_base_pointer_should_return_same_area)
+TEST(FigureTests_v3, cloned_square_via_base_pointer_should_return_same_area)
 {
     auto a = 4.;
     auto square = Square{a};
@@ -79,19 +84,10 @@ TEST(FigureTests_v2, cloned_square_via_base_pointer_should_return_same_area)
     ASSERT_THAT(figure->area(), Eq(square.area()));
 }
 
-TEST(FigureTests_v2, clonning_rvalue)
+TEST(FigureTests_v3, clonning_rvalue)
 {
     auto square = Square{};
     auto figure = object::clone(Square{});
-
-    ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
-}
-
-TEST(FigureTests_v2, cloned_square_via_const_pointer)
-{
-    auto square = Square{};
-    const auto* square_pointer = &square;
-    auto figure = object::clone(square_pointer);
 
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
