@@ -3,6 +3,8 @@
 #include <functional>
 #include <memory>
 
+namespace v2 {
+
 template<typename T>
 auto clone(const T& object) -> std::unique_ptr<T>
 {
@@ -40,7 +42,7 @@ struct Square : Figure
 
 using namespace ::testing;
 
-TEST(FigureTests_v1A, square_clone_method_called_directly_return_pointer_of_type_Square)
+TEST(FigureTests_v2, square_clone_method_called_directly_return_pointer_of_type_Square)
 {
     auto square = Square{};
     auto figure = clone(square);
@@ -48,7 +50,7 @@ TEST(FigureTests_v1A, square_clone_method_called_directly_return_pointer_of_type
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v1A, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
+TEST(FigureTests_v2, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
 {
     auto  square = Square{};
     auto& square_figure = static_cast<Figure&>(square);
@@ -57,7 +59,7 @@ TEST(FigureTests_v1A, square_clone_method_called_via_base_class_return_pointer_o
     ASSERT_TRUE((std::is_same<std::unique_ptr<Figure>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v1A, cloned_square_via_base_pointer_should_return_same_area)
+TEST(FigureTests_v2, cloned_square_via_base_pointer_should_return_same_area)
 {
     auto  a = 4.;
     auto  square = Square{a};
@@ -68,7 +70,7 @@ TEST(FigureTests_v1A, cloned_square_via_base_pointer_should_return_same_area)
     ASSERT_THAT(figure->area(), Eq(square.area()));
 }
 
-TEST(FigureTests_v1A, clonning_rvalue)
+TEST(FigureTests_v2, clonning_rvalue)
 {
     auto square = Square{};
     auto figure = clone(Square{});
@@ -76,7 +78,7 @@ TEST(FigureTests_v1A, clonning_rvalue)
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v1A, clonning_const_figure)
+TEST(FigureTests_v2, clonning_const_figure)
 {
     const auto square = Square{};
     auto figure = clone(square);
@@ -84,4 +86,4 @@ TEST(FigureTests_v1A, clonning_const_figure)
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-
+} // v2 namespace

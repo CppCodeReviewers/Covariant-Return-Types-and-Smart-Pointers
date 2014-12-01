@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 
+namespace v1 {
 
 struct Figure
 {
@@ -68,3 +69,5 @@ TEST(FigureTests, cloning_rvalue)
 
     ASSERT_TRUE((std::is_same<Square*, decltype(figure)>::value));
 }
+
+} // v1 namespace

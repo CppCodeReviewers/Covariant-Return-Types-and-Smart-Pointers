@@ -3,12 +3,15 @@
 #include <functional>
 #include <memory>
 
+namespace v4 {
+
 namespace object
 {
     template<typename T>
     std::unique_ptr<T> clone(const T& object)
     {
         using base_type = typename T::base_type;
+        static_assert(std::is_base_of<base_type, T>::value, "T object has to derived from T::base_type");
         auto ptr = static_cast<const base_type&>(object).clone();
         return std::unique_ptr<T>(static_cast<T*>(ptr));
     }
@@ -25,6 +28,7 @@ struct Figure
     using base_type = Figure;
 
     virtual ~Figure() = default;
+
     virtual double  area()  const = 0;
 
 protected:
@@ -56,7 +60,7 @@ protected:
 
 using namespace ::testing;
 
-TEST(FigureTests_v3, square_clone_method_called_directly_return_pointer_of_type_Square)
+TEST(FigureTests_v4, square_clone_method_called_directly_return_pointer_of_type_Square)
 {
     auto square = Square{};
     auto figure = object::clone(square);
@@ -64,7 +68,7 @@ TEST(FigureTests_v3, square_clone_method_called_directly_return_pointer_of_type_
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v3, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
+TEST(FigureTests_v4, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
 {
     auto square = Square{};
     auto square_figure = static_cast<Figure*>(&square);
@@ -73,7 +77,7 @@ TEST(FigureTests_v3, square_clone_method_called_via_base_class_return_pointer_of
     ASSERT_TRUE((std::is_same<std::unique_ptr<Figure>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v3, cloned_square_via_base_pointer_should_return_same_area)
+TEST(FigureTests_v4, cloned_square_via_base_pointer_should_return_same_area)
 {
     auto a = 4.;
     auto square = Square{a};
@@ -84,7 +88,7 @@ TEST(FigureTests_v3, cloned_square_via_base_pointer_should_return_same_area)
     ASSERT_THAT(figure->area(), Eq(square.area()));
 }
 
-TEST(FigureTests_v3, clonning_rvalue)
+TEST(FigureTests_v4, clonning_rvalue)
 {
     auto square = Square{};
     auto figure = object::clone(Square{});
@@ -92,3 +96,4 @@ TEST(FigureTests_v3, clonning_rvalue)
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
+} // v4 namespace

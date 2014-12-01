@@ -3,6 +3,8 @@
 #include <functional>
 #include <memory>
 
+namespace v3 {
+
 namespace object
 {
 
@@ -51,7 +53,7 @@ struct Square : Figure
 
 using namespace ::testing;
 
-TEST(FigureTests_v2, square_clone_method_called_directly_return_pointer_of_type_Square)
+TEST(FigureTests_v3, square_clone_method_called_directly_return_pointer_of_type_Square)
 {
     auto square = Square{};
     auto figure = object::clone(square);
@@ -59,7 +61,7 @@ TEST(FigureTests_v2, square_clone_method_called_directly_return_pointer_of_type_
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v2, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
+TEST(FigureTests_v3, square_clone_method_called_via_base_class_return_pointer_of_type_Figure)
 {
     auto square = Square{};
     auto square_figure = static_cast<Figure*>(&square);
@@ -68,7 +70,7 @@ TEST(FigureTests_v2, square_clone_method_called_via_base_class_return_pointer_of
     ASSERT_TRUE((std::is_same<std::unique_ptr<Figure>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v2, cloned_square_via_base_pointer_should_return_same_area)
+TEST(FigureTests_v3, cloned_square_via_base_pointer_should_return_same_area)
 {
     auto a = 4.;
     auto square = Square{a};
@@ -79,7 +81,7 @@ TEST(FigureTests_v2, cloned_square_via_base_pointer_should_return_same_area)
     ASSERT_THAT(figure->area(), Eq(square.area()));
 }
 
-TEST(FigureTests_v2, clonning_rvalue)
+TEST(FigureTests_v3, clonning_rvalue)
 {
     auto square = Square{};
     auto figure = object::clone(Square{});
@@ -87,7 +89,7 @@ TEST(FigureTests_v2, clonning_rvalue)
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
-TEST(FigureTests_v2, cloned_square_via_const_pointer)
+TEST(FigureTests_v3, cloned_square_via_const_pointer)
 {
     auto square = Square{};
     const auto* square_pointer = &square;
@@ -96,3 +98,4 @@ TEST(FigureTests_v2, cloned_square_via_const_pointer)
     ASSERT_TRUE((std::is_same<std::unique_ptr<Square>, decltype(figure)>::value));
 }
 
+} // v3 namespace
