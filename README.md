@@ -117,7 +117,7 @@ struct Figure
 	// ... other methods
 	
 protected:
-	virtual std::unique_ptr<Figure> clone() const = 0;
+	virtual Figure* clone() const = 0;
 		
     template <typename T>
     friend std::unique_ptr<T> clone(const T&);
@@ -128,7 +128,7 @@ struct Square : Figure
 	// ... other methods
 	
 protected:
-	std::unique_ptr<Square> clone() const override
+	Square* clone() const override
 	{
 		return new Square(*this);
 	}
@@ -175,7 +175,7 @@ struct Figure
 	// ... other methods
 	
 protected:
-	virtual std::unique_ptr<Figure> clone() const = 0;
+	virtual Figure* clone() const = 0;
 	
     template <typename T>
     friend std::unique_ptr<T> object::clone(const T&);
@@ -207,7 +207,7 @@ struct cloneable
 
 	virtual ~cloneable() = default;	
 protected:
-	virtual std::unique_ptr<Figure> clone() const = 0;
+	virtual Figure* clone() const = 0;
 	
     template <typename T>
     friend std::unique_ptr<T> object::clone(const T&);
@@ -228,7 +228,7 @@ struct cloneable
 
 	virtual ~cloneable() = default;	
 protected:
-	virtual std::unique_ptr<Type> clone() const = 0;
+	virtual Type* clone() const = 0;
 	
     template <typename T>
     friend std::unique_ptr<T> object::clone(const T&);
@@ -290,7 +290,7 @@ struct Square : Figure
 	// ... other methods
 	
 protected:
-	std::unique_ptr<Square> clone() const override
+	Square* clone() const override
 	{
 		return new Square(*this);
 	}
