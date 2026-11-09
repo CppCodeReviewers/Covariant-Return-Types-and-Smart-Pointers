@@ -8,7 +8,7 @@ include(CheckCXXSourceCompiles)
 
 # CMake caches the result of every check. When the compiler or its flags change in an existing build directory,
 # the cached answers are about another configuration, so they are dropped and the checks run again.
-set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC)
+set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC CLONE26_HAVE_REFLECTION)
 set(clone26_probe_signature "${CMAKE_CXX_COMPILER}|${CMAKE_CXX_COMPILER_VERSION}|${CMAKE_CXX_FLAGS}|${CMAKE_CXX_STANDARD}")
 if(NOT "${CLONE26_PROBE_SIGNATURE}" STREQUAL "${clone26_probe_signature}")
   foreach(variable IN LISTS clone26_probe_variables)
@@ -52,3 +52,22 @@ int main() {
   return &*copy == &*held ? 1 : 0;
 }
 ]=] CLONE26_HAVE_POLYMORPHIC)
+
+set(CLONE26_DESCRIPTION_REFLECTION "reflection (__cpp_impl_reflection)")
+check_cxx_source_compiles([=[
+#include <meta>
+#ifndef __cpp_impl_reflection
+#error "no reflection"
+#endif
+struct S {
+  int a;
+};
+constexpr auto kMembers = std::define_static_array(
+    std::meta::members_of(^^S, std::meta::access_context::unchecked()));
+int main() {
+  template for (constexpr auto member : kMembers) {
+    static_assert(!std::meta::is_namespace(member));
+  }
+  return 0;
+}
+]=] CLONE26_HAVE_REFLECTION)
