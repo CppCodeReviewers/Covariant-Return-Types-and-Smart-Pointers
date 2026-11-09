@@ -8,7 +8,7 @@ include(CheckCXXSourceCompiles)
 
 # CMake caches the result of every check. When the compiler or its flags change in an existing build directory,
 # the cached answers are about another configuration, so they are dropped and the checks run again.
-set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON)
+set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC)
 set(clone26_probe_signature "${CMAKE_CXX_COMPILER}|${CMAKE_CXX_COMPILER_VERSION}|${CMAKE_CXX_FLAGS}|${CMAKE_CXX_STANDARD}")
 if(NOT "${CLONE26_PROBE_SIGNATURE}" STREQUAL "${clone26_probe_signature}")
   foreach(variable IN LISTS clone26_probe_variables)
@@ -36,3 +36,19 @@ struct S {
 };
 int main() { return 0; }
 ]=] CLONE26_HAVE_DELETE_REASON)
+
+set(CLONE26_DESCRIPTION_POLYMORPHIC "std::polymorphic (__cpp_lib_polymorphic)")
+check_cxx_source_compiles([=[
+#include <memory>
+#ifndef __cpp_lib_polymorphic
+#error "no std::polymorphic"
+#endif
+struct Base {
+  virtual ~Base() = default;
+};
+int main() {
+  std::polymorphic<Base> held{std::in_place_type<Base>};
+  auto copy = held;
+  return &*copy == &*held ? 1 : 0;
+}
+]=] CLONE26_HAVE_POLYMORPHIC)

@@ -10,3 +10,7 @@ clone26_add_target(design_a_tests TEST
 clone26_add_target(delete_reason_tests TEST
   SOURCES delete_reason_test.cpp
   REQUIRES DELETE_REASON)
+
+clone26_add_target(design_b_tests TEST
+  SOURCES design_b_test.cpp
+  REQUIRES POLYMORPHIC)
