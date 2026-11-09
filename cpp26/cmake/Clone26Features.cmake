@@ -5,10 +5,11 @@
 # Set CMAKE_CXX_STANDARD before including this file: try_compile honours it (policy CMP0067).
 
 include(CheckCXXSourceCompiles)
+include(CheckCXXCompilerFlag)
 
 # CMake caches the result of every check. When the compiler or its flags change in an existing build directory,
 # the cached answers are about another configuration, so they are dropped and the checks run again.
-set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC CLONE26_HAVE_REFLECTION)
+set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC CLONE26_HAVE_CONTRACTS CLONE26_HAVE_CONTRACT_ENFORCE_FLAG CLONE26_HAVE_CONTRACT_OBSERVE_FLAG CLONE26_HAVE_REFLECTION)
 set(clone26_probe_signature "${CMAKE_CXX_COMPILER}|${CMAKE_CXX_COMPILER_VERSION}|${CMAKE_CXX_FLAGS}|${CMAKE_CXX_STANDARD}")
 if(NOT "${CLONE26_PROBE_SIGNATURE}" STREQUAL "${clone26_probe_signature}")
   foreach(variable IN LISTS clone26_probe_variables)
@@ -52,6 +53,30 @@ int main() {
   return &*copy == &*held ? 1 : 0;
 }
 ]=] CLONE26_HAVE_POLYMORPHIC)
+
+# contract_assert has to link as well as compile: GCC 16.2 defines __cpp_contracts for plain -std=c++26, and a
+# program that evaluates a contract_assert then fails to link unless -fcontracts is given.
+set(CLONE26_DESCRIPTION_CONTRACTS "contracts (contract_assert that links)")
+check_cxx_source_compiles([=[
+#ifndef __cpp_contracts
+#error "no contracts"
+#endif
+int main(int argc, char**) {
+  contract_assert(argc > 0);
+  return 0;
+}
+]=] CLONE26_HAVE_CONTRACTS)
+
+# The contract nets choose the evaluation semantic with a compiler flag on their own targets: net_contract_death
+# needs enforce, which terminates the process on a violation, and net_contract needs observe, which calls the
+# violation handler and goes on.
+set(CLONE26_DESCRIPTION_CONTRACT_ENFORCE_FLAG "-fcontract-evaluation-semantic=enforce")
+check_cxx_compiler_flag(-fcontract-evaluation-semantic=enforce CLONE26_HAVE_CONTRACT_ENFORCE_FLAG)
+set(CLONE26_CONTRACT_ENFORCE_FLAG -fcontract-evaluation-semantic=enforce)
+
+set(CLONE26_DESCRIPTION_CONTRACT_OBSERVE_FLAG "-fcontract-evaluation-semantic=observe")
+check_cxx_compiler_flag(-fcontract-evaluation-semantic=observe CLONE26_HAVE_CONTRACT_OBSERVE_FLAG)
+set(CLONE26_CONTRACT_OBSERVE_FLAG -fcontract-evaluation-semantic=observe)
 
 set(CLONE26_DESCRIPTION_REFLECTION "reflection (__cpp_impl_reflection)")
 check_cxx_source_compiles([=[

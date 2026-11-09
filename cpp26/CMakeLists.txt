@@ -22,6 +22,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(clone26 INTERFACE -Wall -Wextra -Wpedantic)
 endif()
 
+# The contracts flavour of clone_check.hpp has the same include name as the default one. A target that links this
+# one finds it first. The target exists only when the feature check found contracts that compile and link.
+if(CLONE26_HAVE_CONTRACTS)
+  add_library(clone26_contracts INTERFACE)
+  target_include_directories(clone26_contracts BEFORE INTERFACE contracts/include)
+  target_link_libraries(clone26_contracts INTERFACE clone26)
+endif()
+
 include(FetchContent)
 FetchContent_Declare(googletest
   GIT_REPOSITORY https://github.com/google/googletest.git

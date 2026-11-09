@@ -24,3 +24,20 @@ clone26_add_target(design_c_tests TEST
 clone26_add_target(design_c_odr TEST
   SOURCES design_c_odr_test.cpp design_c_tu_a.cpp design_c_tu_b.cpp
   REQUIRES DEDUCING_THIS REFLECTION)
+
+# The contract net, net 1 of the four nets that catch a forgotten override. The hierarchy of design A has a
+# ForgetfulTile, in which both hooks were forgotten, and a Tile, in which they were not. The nets have to see
+# ForgetfulTile and accept the rest. The contract net is in two targets. Only they use the contracts flavour of
+# clone_check.hpp, and each picks its evaluation semantic with a flag. net_contract replaces the violation handler
+# with a counting one and observes. net_contract_death enforces, and a death test sees the process terminate.
+clone26_add_target(net_contract TEST
+  SOURCES net_contract_test.cpp
+  REQUIRES DEDUCING_THIS CONTRACTS CONTRACT_OBSERVE_FLAG
+  LINK clone26_contracts
+  OPTIONS ${CLONE26_CONTRACT_OBSERVE_FLAG})
+
+clone26_add_target(net_contract_death TEST
+  SOURCES net_contract_death_test.cpp
+  REQUIRES DEDUCING_THIS CONTRACTS CONTRACT_ENFORCE_FLAG
+  LINK clone26_contracts
+  OPTIONS ${CLONE26_CONTRACT_ENFORCE_FLAG})

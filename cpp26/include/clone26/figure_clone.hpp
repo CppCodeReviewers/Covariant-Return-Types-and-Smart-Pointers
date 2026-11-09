@@ -1,7 +1,8 @@
 #pragma once
 
 // The figures of design A: Figure, Square, Circle and Tile derive from the Cloneable mixin of cloneable.hpp and
-// override its two hooks.
+// override its two hooks. ForgetfulTile is a Tile that forgot both overrides, kept next to Tile so that the nets
+// in cpp26/tests have something to catch. Nothing but the nets uses it.
 
 #include <clone26/cloneable.hpp>
 #include <memory>
@@ -64,6 +65,12 @@ struct Tile : Square {
  private:
   constexpr std::unique_ptr<Cloneable> copy_() const override { return std::make_unique<Tile>(*this); }
   constexpr std::unique_ptr<Cloneable> move_() override { return std::make_unique<Tile>(std::move(*this)); }
+};
+
+// A Tile that forgot to override copy_ and move_.
+struct ForgetfulTile : Square {
+  using Square::Square;
+  int grout = kDefaultGrout;
 };
 
 }  // namespace shapes

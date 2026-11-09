@@ -11,7 +11,12 @@
 //
 // The copy and move operations are protected and defaulted, so a user of a base reference cannot slice by
 // assigning. A derived class stays assignable. A deleted operator in the base would delete the derived one too.
+//
+// Between the hook and the downcast clone() calls clone26::check_clone_type. The default does nothing. A build
+// that wants the check puts contracts/include before include on its include path, which swaps in the
+// clone_check.hpp that has a contract_assert.
 
+#include <clone26/clone_check.hpp>
 #include <memory>
 #include <type_traits>
 
@@ -30,6 +35,8 @@ struct Cloneable {
     } else {
       made = static_cast<Cloneable&>(self).move_();
     }
+    const Cloneable& source = self;
+    clone26::check_clone_type(source, *made);
     return std::unique_ptr<T>(static_cast<T*>(made.release()));
   }
 
