@@ -73,4 +73,10 @@ struct ForgetfulTile : Square {
   int grout = kDefaultGrout;
 };
 
+// Two more members of the namespace that the reflection of the nets has to get right: a forward declaration, which
+// is not complete and has no bases to ask about, and an alias, which names Tile a second time. Neither is a class
+// of the hierarchy, and the nets must not list either.
+struct Pending;
+using TileAlias = Tile;
+
 }  // namespace shapes

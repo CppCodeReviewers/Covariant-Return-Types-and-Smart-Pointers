@@ -9,7 +9,7 @@ include(CheckCXXCompilerFlag)
 
 # CMake caches the result of every check. When the compiler or its flags change in an existing build directory,
 # the cached answers are about another configuration, so they are dropped and the checks run again.
-set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC CLONE26_HAVE_CONTRACTS CLONE26_HAVE_CONTRACT_ENFORCE_FLAG CLONE26_HAVE_CONTRACT_OBSERVE_FLAG CLONE26_HAVE_REFLECTION)
+set(clone26_probe_variables CLONE26_HAVE_DEDUCING_THIS CLONE26_HAVE_DELETE_REASON CLONE26_HAVE_POLYMORPHIC CLONE26_HAVE_CONTRACTS CLONE26_HAVE_CONTRACT_ENFORCE_FLAG CLONE26_HAVE_CONTRACT_OBSERVE_FLAG CLONE26_HAVE_REFLECTION CLONE26_HAVE_CONSTEXPR_ROUND_TRIP)
 set(clone26_probe_signature "${CMAKE_CXX_COMPILER}|${CMAKE_CXX_COMPILER_VERSION}|${CMAKE_CXX_FLAGS}|${CMAKE_CXX_STANDARD}")
 if(NOT "${CLONE26_PROBE_SIGNATURE}" STREQUAL "${clone26_probe_signature}")
   foreach(variable IN LISTS clone26_probe_variables)
@@ -96,3 +96,20 @@ int main() {
   return 0;
 }
 ]=] CLONE26_HAVE_REFLECTION)
+
+set(CLONE26_DESCRIPTION_CONSTEXPR_ROUND_TRIP "constexpr std::unique_ptr and typeid comparison")
+check_cxx_source_compiles([=[
+#include <memory>
+#include <typeinfo>
+struct Base {
+  constexpr virtual ~Base() = default;
+};
+struct Derived : Base {};
+constexpr bool round_trip() {
+  std::unique_ptr<Base> made = std::make_unique<Derived>();
+  const Base& made_ref = *made;
+  return typeid(made_ref) == typeid(Derived);
+}
+static_assert(round_trip());
+int main() { return 0; }
+]=] CLONE26_HAVE_CONSTEXPR_ROUND_TRIP)
