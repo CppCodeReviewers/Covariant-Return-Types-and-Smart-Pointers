@@ -30,6 +30,8 @@ if(CLONE26_HAVE_CONTRACTS)
   target_link_libraries(clone26_contracts INTERFACE clone26)
 endif()
 
+include(Clone26Mutant)
+
 include(FetchContent)
 FetchContent_Declare(googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
