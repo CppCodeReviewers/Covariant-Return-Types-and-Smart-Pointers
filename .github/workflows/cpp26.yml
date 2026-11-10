@@ -1,0 +1,63 @@
+name: cpp26
+
+on:
+  push:
+    paths:
+      - "cpp26/**"
+      - ".github/workflows/cpp26.yml"
+  pull_request:
+    paths:
+      - "cpp26/**"
+      - ".github/workflows/cpp26.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # GCC 16 has everything the project uses: explicit object parameters, contracts, reflection and
+  # std::polymorphic. Every target is built, the tests run, and check_nets.sh proves that the four nets pass and
+  # that each one fails when Tile loses its overrides.
+  gcc16:
+    name: GCC 16 with contracts and reflection
+    runs-on: ubuntu-latest
+    container: gcc:16
+    timeout-minutes: 30  # a ceiling: a full build and test run takes about a minute
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install CMake and Ninja
+        run: apt-get update && apt-get install -y --no-install-recommends cmake ninja-build
+      - name: Show the compiler
+        run: g++ --version && cmake --version
+      - name: Configure
+        run: cmake -S cpp26 -B build -G Ninja -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="-fcontracts -freflection"
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Check the nets
+        run: cpp26/check_nets.sh
+        env:
+          CXX: g++
+          CXXFLAGS: -fcontracts -freflection
+
+  # Clang 22 with libc++ has explicit object parameters and a constexpr unique_ptr, and neither contracts, reflection
+  # nor std::polymorphic. Only the design A tests, the delete-reason test and the constexpr net are expected to
+  # build. The configure step prints a "skipping" line for each target that needs a missing feature.
+  clang22:
+    name: Clang 22 with libc++
+    runs-on: ubuntu-latest
+    container: silkeh/clang:22
+    timeout-minutes: 30  # a ceiling: a full build and test run takes about a minute
+    steps:
+      - name: Install Git and Ninja
+        run: apt-get update && apt-get install -y --no-install-recommends git ninja-build
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Show the compiler
+        run: clang++ --version && cmake --version
+      - name: Configure
+        run: cmake -S cpp26 -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
